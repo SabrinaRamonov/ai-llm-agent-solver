@@ -1,5 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
+from agent import Agent
 
 async def main():
     async with async_playwright() as p:
@@ -7,7 +8,8 @@ async def main():
         page = await browser.new_page()
         await page.goto("https://gandalf.lakera.ai/baseline")
         
-        # TODO: Implement the logic for interacting with the Gandalf game
+        agent = Agent()
+        await agent.solve_game(page)
         
         await browser.close()
 
