@@ -9,7 +9,7 @@ class Agent:
         self.current_level = 1
         self.max_levels = 8
 
-    async def next_action(self, page):
+    async def next_action(self):
         # TODO: Implement logic to decide whether to ask a question or guess the password
         # This is a placeholder implementation
         if self.current_level <= self.max_levels:
@@ -18,3 +18,5 @@ class Agent:
         else:
             print("Game over!")
             return None
+
+    # TODO: Add methods to update the agent's state based on the environment's response

@@ -1,29 +1,28 @@
 import asyncio
-from playwright.async_api import async_playwright
-from agent import Agent, Action
+from env import Env
+from agent import Agent
 
 async def main():
-    async with async_playwright() as p:
-        browser = await p.chromium.launch()
-        page = await browser.new_page()
-        await page.goto("https://gandalf.lakera.ai/baseline")
-        
-        agent = Agent()
+    env = Env()
+    agent = Agent()
+
+    async with env.start() as env_context:
         while True:
-            action = await agent.next_action(page)
+            action = await agent.next_action()
             if action is None:
                 break
+
+            result = await env_context.step(action)
             
-            if action == Action.ASK_QUESTION:
-                # TODO: Implement logic to ask a question
-                print("Asking a question...")
-            elif action == Action.GUESS_PASSWORD:
-                # TODO: Implement logic to guess the password
-                print("Guessing the password...")
-            
-            # TODO: Implement logic to handle the response and update the agent's state
-        
-        await browser.close()
+            if result.response_type == "correct_password":
+                print("Correct password guessed!")
+                break
+            elif result.response_type == "incorrect_password":
+                print("Incorrect password guessed.")
+            elif result.response_type == "guess_result":
+                print(f"LLM feedback: {result.content}")
+
+            # TODO: Update agent's state based on the result
 
 if __name__ == "__main__":
     asyncio.run(main())
