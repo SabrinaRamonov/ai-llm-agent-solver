@@ -1,6 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
-from agent import Agent
+from agent import Agent, Action
 
 async def main():
     async with async_playwright() as p:
@@ -9,7 +9,11 @@ async def main():
         await page.goto("https://gandalf.lakera.ai/baseline")
         
         agent = Agent()
-        await agent.solve_game(page)
+        while True:
+            action = await agent.next_action(page)
+            if action == Action.GAME_OVER:
+                break
+            await agent.execute_action(action, page)
         
         await browser.close()
 
