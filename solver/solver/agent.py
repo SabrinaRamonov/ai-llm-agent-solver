@@ -82,8 +82,23 @@ class Agent:
         })
 
     def parse_password(self, response):
-        # Simple regex to find potential passwords (adjust as needed)
-        password_match = re.search(r'\b[A-Za-z0-9]{8,}\b', response)
-        if password_match:
-            return password_match.group(0)
-        return None
+        prompt = f"""
+        Given the following response from a game, extract the password if one is present.
+        If no password is found, respond with 'No password found'.
+
+        Response: {response}
+
+        Password:
+        """
+        
+        llm_response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": prompt}],
+            max_tokens=50
+        )
+        
+        extracted_password = llm_response.choices[0].message.content.strip()
+        
+        if extracted_password == 'No password found':
+            return None
+        return extracted_password
