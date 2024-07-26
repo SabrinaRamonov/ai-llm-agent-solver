@@ -12,8 +12,20 @@ class EnvContext:
         self._page = page
 
     async def ask_question(self, question: str) -> StepResult:
-        # TODO: Implement logic to ask a question
-        return StepResult("guess_result", "LLM feedback for the question")
+        # Wait for the textarea to be available
+        await self._page.wait_for_selector('textarea#comment')
+        
+        # Fill out the textarea with the question and press Enter
+        await self._page.fill('textarea#comment', question)
+        await self._page.press('textarea#comment', 'Enter')
+        
+        # Wait for the response to be visible
+        response_element = await self._page.wait_for_selector('p.answer')
+        
+        # Read the text content of the response
+        response_text = await response_element.inner_text()
+        
+        return StepResult("guess_result", response_text)
 
     async def guess_password(self, password: str) -> StepResult:
         # TODO: Implement logic to guess the password
