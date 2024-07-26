@@ -28,9 +28,25 @@ class EnvContext:
         return StepResult("guess_result", response_text)
 
     async def guess_password(self, password: str) -> StepResult:
-        # TODO: Implement logic to guess the password
-        # For now, we'll assume it's always incorrect
-        return StepResult("incorrect_password")
+        # Wait for the input element to be available
+        await self._page.wait_for_selector('input#guess')
+        
+        # Fill out the input with the password guess
+        await self._page.fill('input#guess', password)
+        
+        # Click the Validate button
+        await self._page.click('button:has-text("Validate")')
+        
+        # Wait for the result alert to appear
+        alert_element = await self._page.wait_for_selector('div.customAlert')
+        
+        # Read the text content of the alert
+        alert_text = await alert_element.inner_text()
+        
+        if "Wrong password" in alert_text:
+            return StepResult("incorrect_password")
+        else:
+            return StepResult("correct_password")
 
     async def step(self, action: Action, input_str: str) -> StepResult:
         if action == Action.ASK_QUESTION:
