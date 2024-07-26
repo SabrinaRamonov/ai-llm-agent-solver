@@ -11,14 +11,22 @@ class EnvContext:
     def __init__(self, page: Page):
         self._page = page
 
-    async def step(self, action: Action) -> StepResult:
+    async def ask_question(self, question: str) -> StepResult:
+        # TODO: Implement logic to ask a question
+        return StepResult("guess_result", "LLM feedback for the question")
+
+    async def guess_password(self, password: str) -> StepResult:
+        # TODO: Implement logic to guess the password
+        # For now, we'll assume it's always incorrect
+        return StepResult("incorrect_password")
+
+    async def step(self, action: Action, input_str: str) -> StepResult:
         if action == Action.ASK_QUESTION:
-            # TODO: Implement logic to ask a question
-            return StepResult("guess_result", "LLM feedback for the question")
+            return await self.ask_question(input_str)
         elif action == Action.GUESS_PASSWORD:
-            # TODO: Implement logic to guess the password
-            # For now, we'll assume it's always incorrect
-            return StepResult("incorrect_password")
+            return await self.guess_password(input_str)
+        else:
+            raise ValueError(f"Unknown action: {action}")
 
 class Env:
     def __init__(self, url: str = "https://gandalf.lakera.ai/baseline"):
