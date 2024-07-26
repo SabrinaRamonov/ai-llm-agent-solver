@@ -11,9 +11,17 @@ async def main():
         agent = Agent()
         while True:
             action = await agent.next_action(page)
-            if action == Action.GAME_OVER:
+            if action is None:
                 break
-            await agent.execute_action(action, page)
+            
+            if action == Action.ASK_QUESTION:
+                # TODO: Implement logic to ask a question
+                print("Asking a question...")
+            elif action == Action.GUESS_PASSWORD:
+                # TODO: Implement logic to guess the password
+                print("Guessing the password...")
+            
+            # TODO: Implement logic to handle the response and update the agent's state
         
         await browser.close()
 
