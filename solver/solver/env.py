@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from playwright.async_api import async_playwright, Page
-from agent import Action
+from solver.agent import Action
 
 class StepResult:
     def __init__(self, response_type: str, content: str = None):

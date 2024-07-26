@@ -1,5 +1,5 @@
 import asyncio
-from solver.env import Env
+from solver.solver.env import Env
 from solver.agent import Action
 
 async def test_ask_question():
