@@ -39,10 +39,10 @@ class Agent:
 
         Respond in the following format:
         Action: [ASK_QUESTION or GUESS_PASSWORD]
-        Content: [Your question or password guess (minimum 10 characters)]
+        Content: [Your question (minimum 10 characters) or password guess]
         Reasoning: [Brief explanation of your choice]
 
-        Note: Ensure that your question or password guess is at least 10 characters long.
+        Note: Ensure that your question is at least 10 characters long. This length requirement does not apply to password guesses.
         """
         return prompt
 
