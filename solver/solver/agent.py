@@ -68,7 +68,15 @@ class Agent:
         reasoning_match = re.search(r"Reasoning: (.+)", response, re.DOTALL)
 
         if action_match and content_match:
-            action = Action[action_match.group(1)]
+            action_str = action_match.group(1)
+            if action_str == "ASK_QUESTION":
+                action = Action.ASK_QUESTION
+            elif action_str == "GUESS_PASSWORD":
+                action = Action.GUESS_PASSWORD
+            else:
+                logging.error(f"Unknown action: {action_str}")
+                action = Action.ASK_QUESTION
+
             content = content_match.group(1)
             reasoning = reasoning_match.group(1) if reasoning_match else "No reasoning provided"
             logging.info(f"LLM Reasoning: {reasoning}")
