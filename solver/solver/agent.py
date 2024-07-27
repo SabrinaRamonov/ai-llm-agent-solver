@@ -28,7 +28,8 @@ class Agent:
         action, content = self._parse_llm_response(response)
         self._log_attempt(action, content)
         logging.info(f"Decided on action: {action}, content: {content}")
-        return action, content, response
+        self.update_history(action, content, response)
+        return action, content
 
     def _generate_prompt(self):
         prompt = f"""
@@ -107,10 +108,6 @@ class Agent:
         })
         logging.info(f"History updated - Action: {action}, Content: {content}, Response: {response[:100]}...")  # Log first 100 chars of response
 
-    async def next_action(self):
-        action, content, llm_response = await super().next_action()
-        self.update_history(action, content, llm_response)
-        return action, content
 
     def parse_password(self, response):
         prompt = f"""
