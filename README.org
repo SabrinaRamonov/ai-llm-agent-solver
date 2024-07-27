@@ -1,0 +1,31 @@
+* Solver Project
+
+This project contains a solver for the Gandalf AI challenge.
+
+** Running the Test Environment
+
+To run the test environment, follow these steps:
+
+1. Ensure you have Python 3.7+ installed on your system.
+
+2. Install the required dependencies:
+   #+BEGIN_SRC shell
+   pip install poetry
+   poetry install
+   #+END_SRC
+
+3. Activate the virtual environment:
+   #+BEGIN_SRC shell
+   poetry shell
+   #+END_SRC
+
+4. Run the test_env.py file:
+   #+BEGIN_SRC shell
+   python solver/tests/test_env.py
+   #+END_SRC
+
+This will start the test environment, which will attempt to solve the Gandalf AI challenge using the implemented agent.
+
+** Note
+
+Make sure you have set up your OpenAI API key as an environment variable named =OPENAI_API_KEY= before running the test.
