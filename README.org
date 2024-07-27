@@ -19,13 +19,24 @@ To run the test environment, follow these steps:
    poetry shell
    #+END_SRC
 
-4. Run the test_env.py file:
+4. Navigate to the solver directory:
    #+BEGIN_SRC shell
-   python solver/tests/test_env.py
+   cd solver
+   #+END_SRC
+
+5. Run the test_env.py file:
+   #+BEGIN_SRC shell
+   python -m tests.test_env
    #+END_SRC
 
 This will start the test environment, which will attempt to solve the Gandalf AI challenge using the implemented agent.
 
 ** Note
 
-Make sure you have set up your OpenAI API key as an environment variable named =OPENAI_API_KEY= before running the test.
+Make sure you have set up your OpenAI API key as an environment variable named =OPENAI_API_KEY= before running the test. You can do this by running:
+
+#+BEGIN_SRC shell
+export OPENAI_API_KEY=your_api_key_here
+#+END_SRC
+
+Replace =your_api_key_here= with your actual OpenAI API key.
