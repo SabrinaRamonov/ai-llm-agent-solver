@@ -5,6 +5,7 @@ import logging
 import os
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
 
 class Action(Enum):
     ASK_QUESTION = auto()
@@ -15,13 +16,7 @@ class Agent:
     def __init__(self):
         self.history = []
         self.client = OpenAI()
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s',
-                            handlers=[
-                                logging.FileHandler("agent_log.txt"),
-                                logging.StreamHandler()
-                            ])
-        logging.info("Agent initialized")
+        logger.info("Agent initialized")
 
     async def next_action(self):
         logger.info("Starting to generate next action")
