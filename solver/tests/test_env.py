@@ -16,7 +16,6 @@ async def test_agent_guessing():
                 break
 
             result = await context.step(action, content)
-            agent.update_history(action, content, result.content)
 
             print(f"Attempt {attempt + 1}:")
             print(f"Action: {action}")
@@ -28,6 +27,9 @@ async def test_agent_guessing():
             if result.response_type == "correct_password":
                 print(f"Password guessed correctly on attempt {attempt + 1}!")
                 break
+
+            # Update the agent's history with the environment's response
+            agent.update_history(action, content, result.content)
 
         else:
             print(f"Failed to guess the password after {max_attempts} attempts.")
