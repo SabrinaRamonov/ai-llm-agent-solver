@@ -3,6 +3,7 @@ from openai import OpenAI
 import re
 import logging
 import os
+from datetime import datetime
 
 
 class Action(Enum):
@@ -14,13 +15,19 @@ class Agent:
     def __init__(self):
         self.history = []
         self.client = OpenAI()
-        logging.basicConfig(filename="agent_log.txt", level=logging.INFO)
+        logging.basicConfig(filename="agent_log.txt", level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.info("Agent initialized")
 
     async def next_action(self):
+        logging.info("Generating next action")
         prompt = self._generate_prompt()
+        logging.info(f"Generated prompt: {prompt[:100]}...")  # Log first 100 chars of prompt
         response = self._get_llm_response(prompt)
+        logging.info(f"Received LLM response: {response[:100]}...")  # Log first 100 chars of response
         action, content = self._parse_llm_response(response)
         self._log_attempt(action, content)
+        logging.info(f"Decided on action: {action}, content: {content}")
         return action, content
 
     def _generate_prompt(self):
@@ -55,11 +62,15 @@ class Agent:
         return formatted_history
 
     def _get_llm_response(self, prompt):
+        logging.info("Sending request to LLM")
+        start_time = datetime.now()
         response = self.client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "system", "content": prompt}],
             max_tokens=200,
         )
+        end_time = datetime.now()
+        logging.info(f"LLM response received. Time taken: {end_time - start_time}")
         return response.choices[0].message.content
 
     def _parse_llm_response(self, response):
@@ -94,6 +105,7 @@ class Agent:
             "content": content,
             "response": response
         })
+        logging.info(f"History updated - Action: {action}, Content: {content}, Response: {response[:100]}...")  # Log first 100 chars of response
 
     def parse_password(self, response):
         prompt = f"""
