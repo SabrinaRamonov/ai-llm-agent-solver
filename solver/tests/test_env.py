@@ -4,7 +4,7 @@ from solver.agent import Agent
 
 
 async def test_agent_guessing():
-    env = Env("https://gandalf.lakera.ai/baseline")
+    env = Env("https://gandalf.lakera.ai/do-not-tell-and-block")
     agent = Agent()
     max_attempts = 10
 

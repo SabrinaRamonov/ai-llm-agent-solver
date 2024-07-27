@@ -3,12 +3,15 @@ from playwright.async_api import async_playwright, Page
 from solver.agent import Action
 import logging
 
+# Configure logging
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     handlers=[
-                        logging.FileHandler("env_log.txt"),
+                        logging.FileHandler("solver.log"),
                         logging.StreamHandler()
                     ])
+
+logger = logging.getLogger(__name__)
 
 
 class StepResult:
@@ -22,55 +25,55 @@ class EnvContext:
         self._page = page
 
     async def ask_question(self, question: str) -> StepResult:
-        logging.info(f"Asking question: {question}")
+        logger.info(f"Asking question: {question}")
         
         # Wait for the textarea to be available
         await self._page.wait_for_selector("textarea#comment")
-        logging.info("Textarea found")
+        logger.info("Textarea found")
 
         # Fill out the textarea with the question and press Enter
         await self._page.fill("textarea#comment", question)
         await self._page.press("textarea#comment", "Enter")
-        logging.info("Question submitted")
+        logger.info("Question submitted")
 
         # Wait for the response to be visible
         response_element = await self._page.wait_for_selector("p.answer")
-        logging.info("Response element found")
+        logger.info("Response element found")
 
         # Read the text content of the response
         response_text = await response_element.inner_text()
-        logging.info(f"Response received: {response_text[:100]}...")  # Log first 100 chars of response
+        logger.info(f"Response received: {response_text[:100]}...")  # Log first 100 chars of response
 
         return StepResult("guess_result", response_text)
 
     async def guess_password(self, password: str) -> StepResult:
-        logging.info(f"Guessing password: {password}")
+        logger.info(f"Guessing password: {password}")
         
         # Wait for the input element to be available
         await self._page.wait_for_selector("input#guess")
-        logging.info("Password input field found")
+        logger.info("Password input field found")
 
         # Fill out the input with the password guess
         await self._page.fill("input#guess", password)
-        logging.info("Password entered")
+        logger.info("Password entered")
 
         # Click the Validate button
         await self._page.click('button:has-text("Validate")')
-        logging.info("Validate button clicked")
+        logger.info("Validate button clicked")
 
         # Wait for the result alert to appear
         alert_element = await self._page.wait_for_selector("div.customAlert")
-        logging.info("Alert element found")
+        logger.info("Alert element found")
 
         # Read the text content of the alert
         alert_text = await alert_element.inner_text()
-        logging.info(f"Alert text: {alert_text}")
+        logger.info(f"Alert text: {alert_text}")
 
         if "Wrong password" in alert_text:
-            logging.info("Incorrect password")
+            logger.info("Incorrect password")
             return StepResult("incorrect_password")
         else:
-            logging.info("Correct password!")
+            logger.info("Correct password!")
             return StepResult("correct_password")
 
     async def step(self, action: Action, input_str: str) -> StepResult:
@@ -85,23 +88,23 @@ class EnvContext:
 class Env:
     def __init__(self, url: str = "https://gandalf.lakera.ai/baseline"):
         self.url = url
-        logging.info(f"Environment initialized with URL: {self.url}")
+        logger.info(f"Environment initialized with URL: {self.url}")
 
     @asynccontextmanager
     async def start(self):
-        logging.info("Starting environment")
+        logger.info("Starting environment")
         async with async_playwright() as p:
-            logging.info("Launching browser")
+            logger.info("Launching browser")
             browser = await p.chromium.launch()
-            logging.info("Creating new page")
+            logger.info("Creating new page")
             page = await browser.new_page()
-            logging.info(f"Navigating to URL: {self.url}")
+            logger.info(f"Navigating to URL: {self.url}")
             await page.goto(self.url)
 
             try:
-                logging.info("Environment setup complete, yielding EnvContext")
+                logger.info("Environment setup complete, yielding EnvContext")
                 yield EnvContext(page)
             finally:
-                logging.info("Closing browser")
+                logger.info("Closing browser")
                 await browser.close()
-        logging.info("Environment stopped")
+        logger.info("Environment stopped")
