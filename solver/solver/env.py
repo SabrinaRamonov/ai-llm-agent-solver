@@ -3,6 +3,13 @@ from playwright.async_api import async_playwright, Page
 from solver.agent import Action
 import logging
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[
+                        logging.FileHandler("env_log.txt"),
+                        logging.StreamHandler()
+                    ])
+
 
 class StepResult:
     def __init__(self, response_type: str, content: str = None):

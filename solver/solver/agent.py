@@ -15,8 +15,12 @@ class Agent:
     def __init__(self):
         self.history = []
         self.client = OpenAI()
-        logging.basicConfig(filename="agent_log.txt", level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s',
+                            handlers=[
+                                logging.FileHandler("agent_log.txt"),
+                                logging.StreamHandler()
+                            ])
         logging.info("Agent initialized")
 
     async def next_action(self):
