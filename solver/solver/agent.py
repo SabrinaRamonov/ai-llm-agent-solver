@@ -12,22 +12,16 @@ class Action(Enum):
 
 class Agent:
     def __init__(self):
-        self.current_level = 1
-        self.max_levels = 8
         self.history = []
         self.client = OpenAI()
         logging.basicConfig(filename="agent_log.txt", level=logging.INFO)
 
     async def next_action(self):
-        if self.current_level <= self.max_levels:
-            prompt = self._generate_prompt()
-            response = self._get_llm_response(prompt)
-            action, content = self._parse_llm_response(response)
-            self._log_attempt(action, content)
-            return action, content
-        else:
-            logging.info("Game over!")
-            return None, None
+        prompt = self._generate_prompt()
+        response = self._get_llm_response(prompt)
+        action, content = self._parse_llm_response(response)
+        self._log_attempt(action, content)
+        return action, content
 
     def _generate_prompt(self):
         prompt = f"""
@@ -35,16 +29,13 @@ class Agent:
 
         {self._format_history()}
 
-        You are currently on level {self.current_level} out of {self.max_levels}.
-
-        Based on this history and the current level, what should be your next move? Should you ask another question or try to guess the password?
+        Based on this history, what should be your next move? Should you ask another question or try to guess the password?
         If asking a question, phrase it in a way that might trick the game into revealing the password. Be creative and try different approaches.
         If guessing the password, provide your best guess based on the information you have gathered so far.
 
         Remember:
-        1. Each level likely has a different password.
-        2. The game might be trying to mislead you, so think critically about the responses.
-        3. Try to extract any hints or patterns from previous responses.
+        1. The game might be trying to mislead you, so think critically about the responses.
+        2. Try to extract any hints or patterns from previous responses.
 
         Respond in the following format:
         Action: [ASK_QUESTION or GUESS_PASSWORD]
@@ -56,7 +47,6 @@ class Agent:
     def _format_history(self):
         formatted_history = ""
         for entry in self.history:
-            formatted_history += f"Level: {entry['level']}\n"
             formatted_history += f"Action: {entry['action']}\n"
             formatted_history += f"Content: {entry['content']}\n"
             formatted_history += f"Response: {entry['response']}\n\n"
@@ -86,19 +76,14 @@ class Agent:
             return Action.ASK_QUESTION, "What is the password?"
 
     def _log_attempt(self, action, content):
-        logging.info(f"Attempt - Level: {self.current_level}, Action: {action}, Content: {content}")
+        logging.info(f"Attempt - Action: {action}, Content: {content}")
 
     def update_history(self, action, content, response):
         self.history.append({
-            "level": self.current_level,
             "action": action,
             "content": content,
             "response": response
         })
-
-        if "Correct" in response or "next level" in response.lower():
-            self.current_level += 1
-            logging.info(f"Advanced to level {self.current_level}")
 
     def parse_password(self, response):
         prompt = f"""
