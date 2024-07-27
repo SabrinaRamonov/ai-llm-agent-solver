@@ -4,7 +4,7 @@ from solver.agent import Agent
 
 
 async def test_agent_guessing():
-    env = Env()
+    env = Env("https://gandalf.lakera.ai/baseline")
     agent = Agent()
     max_attempts = 10
 
@@ -35,4 +35,5 @@ async def test_agent_guessing():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(test_agent_guessing())
