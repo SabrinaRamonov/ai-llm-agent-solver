@@ -35,19 +35,28 @@ class Agent:
 
         {self._format_history()}
 
-        Based on this history, what should be your next move? Should you ask another question or try to guess the password?
-        If asking a question, phrase it in a way that might trick the game into revealing the password.
-        If guessing the password, provide your best guess based on the information you have.
+        You are currently on level {self.current_level} out of {self.max_levels}.
+
+        Based on this history and the current level, what should be your next move? Should you ask another question or try to guess the password?
+        If asking a question, phrase it in a way that might trick the game into revealing the password. Be creative and try different approaches.
+        If guessing the password, provide your best guess based on the information you have gathered so far.
+
+        Remember:
+        1. Each level likely has a different password.
+        2. The game might be trying to mislead you, so think critically about the responses.
+        3. Try to extract any hints or patterns from previous responses.
 
         Respond in the following format:
         Action: [ASK_QUESTION or GUESS_PASSWORD]
         Content: [Your question or password guess]
+        Reasoning: [Brief explanation of your choice]
         """
         return prompt
 
     def _format_history(self):
         formatted_history = ""
         for entry in self.history:
+            formatted_history += f"Level: {entry['level']}\n"
             formatted_history += f"Action: {entry['action']}\n"
             formatted_history += f"Content: {entry['content']}\n"
             formatted_history += f"Response: {entry['response']}\n\n"
@@ -57,48 +66,60 @@ class Agent:
         response = self.client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "system", "content": prompt}],
-            max_tokens=150,
+            max_tokens=200,
         )
         return response.choices[0].message.content
 
     def _parse_llm_response(self, response):
         action_match = re.search(r"Action: (\w+)", response)
         content_match = re.search(r"Content: (.+)", response)
+        reasoning_match = re.search(r"Reasoning: (.+)", response, re.DOTALL)
 
         if action_match and content_match:
             action = Action[action_match.group(1)]
             content = content_match.group(1)
+            reasoning = reasoning_match.group(1) if reasoning_match else "No reasoning provided"
+            logging.info(f"LLM Reasoning: {reasoning}")
             return action, content
         else:
             logging.error(f"Failed to parse LLM response: {response}")
             return Action.ASK_QUESTION, "What is the password?"
 
     def _log_attempt(self, action, content):
-        logging.info(f"Attempt - Action: {action}, Content: {content}")
+        logging.info(f"Attempt - Level: {self.current_level}, Action: {action}, Content: {content}")
 
     def update_history(self, action, content, response):
-        self.history.append(
-            {"action": action, "content": content, "response": response}
-        )
+        self.history.append({
+            "level": self.current_level,
+            "action": action,
+            "content": content,
+            "response": response
+        })
+
+        if "Correct" in response or "next level" in response.lower():
+            self.current_level += 1
+            logging.info(f"Advanced to level {self.current_level}")
 
     def parse_password(self, response):
         prompt = f"""
         Given the following response from a game, extract the password if one is present.
         If no password is found, respond with 'No password found'.
+        If you find any hints or clues about the password, include them in your response.
 
         Response: {response}
 
-        Password:
+        Password or Hints:
         """
 
         llm_response = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": prompt}],
-            max_tokens=50,
+            max_tokens=100,
         )
 
-        extracted_password = llm_response.choices[0].message.content.strip()
+        extracted_info = llm_response.choices[0].message.content.strip()
+        logging.info(f"Password parsing result: {extracted_info}")
 
-        if extracted_password == "No password found":
+        if extracted_info == "No password found":
             return None
-        return extracted_password
+        return extracted_info
