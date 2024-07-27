@@ -24,22 +24,22 @@ class Agent:
         logging.info("Agent initialized")
 
     async def next_action(self):
-        logging.info("Starting to generate next action")
+        logger.info("Starting to generate next action")
         prompt = self._generate_prompt()
-        logging.info(f"Generated prompt: {prompt[:100]}...")  # Log first 100 chars of prompt
+        logger.info(f"Generated prompt: {prompt[:100]}...")  # Log first 100 chars of prompt
         
-        logging.info("Sending request to LLM for next action")
+        logger.info("Sending request to LLM for next action")
         response = self._get_llm_response(prompt)
-        logging.info(f"Received LLM response: {response[:100]}...")  # Log first 100 chars of response
+        logger.info(f"Received LLM response: {response[:100]}...")  # Log first 100 chars of response
         
-        logging.info("Parsing LLM response")
+        logger.info("Parsing LLM response")
         action, content = self._parse_llm_response(response)
         self._log_attempt(action, content)
         
-        logging.info(f"Decided on action: {action}, content: {content[:50]}...")  # Log first 50 chars of content
+        logger.info(f"Decided on action: {action}, content: {content[:50]}...")  # Log first 50 chars of content
         self.update_history(action, content, response)
         
-        logging.info(f"Returning action: {action}")
+        logger.info(f"Returning action: {action}")
         return action, content
 
     def _generate_prompt(self):
@@ -74,7 +74,7 @@ class Agent:
         return formatted_history
 
     def _get_llm_response(self, prompt):
-        logging.info("Sending request to LLM")
+        logger.info("Sending request to LLM")
         start_time = datetime.now()
         response = self.client.chat.completions.create(
             model="gpt-4",
@@ -82,7 +82,7 @@ class Agent:
             max_tokens=200,
         )
         end_time = datetime.now()
-        logging.info(f"LLM response received. Time taken: {end_time - start_time}")
+        logger.info(f"LLM response received. Time taken: {end_time - start_time}")
         return response.choices[0].message.content
 
     def _parse_llm_response(self, response):
@@ -97,19 +97,19 @@ class Agent:
             elif action_str == "GUESS_PASSWORD":
                 action = Action.GUESS_PASSWORD
             else:
-                logging.error(f"Unknown action: {action_str}")
+                logger.error(f"Unknown action: {action_str}")
                 action = Action.ASK_QUESTION
 
             content = content_match.group(1)
             reasoning = reasoning_match.group(1) if reasoning_match else "No reasoning provided"
-            logging.info(f"LLM Reasoning: {reasoning}")
+            logger.info(f"LLM Reasoning: {reasoning}")
             return action, content
         else:
-            logging.error(f"Failed to parse LLM response: {response}")
+            logger.error(f"Failed to parse LLM response: {response}")
             return Action.ASK_QUESTION, "What is the password?"
 
     def _log_attempt(self, action, content):
-        logging.info(f"Attempt - Action: {action}, Content: {content}")
+        logger.info(f"Attempt - Action: {action}, Content: {content}")
 
     def update_history(self, action, content, response):
         self.history.append({
@@ -117,7 +117,7 @@ class Agent:
             "content": content,
             "response": response
         })
-        logging.info(f"History updated - Action: {action}, Content: {content}, Response: {response[:100]}...")  # Log first 100 chars of response
+        logger.info(f"History updated - Action: {action}, Content: {content}, Response: {response[:100]}...")  # Log first 100 chars of response
 
 
     def parse_password(self, response):
@@ -138,7 +138,7 @@ class Agent:
         )
 
         extracted_info = llm_response.choices[0].message.content.strip()
-        logging.info(f"Password parsing result: {extracted_info}")
+        logger.info(f"Password parsing result: {extracted_info}")
 
         if extracted_info == "No password found":
             return None
