@@ -78,15 +78,23 @@ class EnvContext:
 class Env:
     def __init__(self, url: str = "https://gandalf.lakera.ai/baseline"):
         self.url = url
+        logging.info(f"Environment initialized with URL: {self.url}")
 
     @asynccontextmanager
     async def start(self):
+        logging.info("Starting environment")
         async with async_playwright() as p:
+            logging.info("Launching browser")
             browser = await p.chromium.launch()
+            logging.info("Creating new page")
             page = await browser.new_page()
+            logging.info(f"Navigating to URL: {self.url}")
             await page.goto(self.url)
 
             try:
+                logging.info("Environment setup complete, yielding EnvContext")
                 yield EnvContext(page)
             finally:
+                logging.info("Closing browser")
                 await browser.close()
+        logging.info("Environment stopped")

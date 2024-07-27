@@ -20,15 +20,22 @@ class Agent:
         logging.info("Agent initialized")
 
     async def next_action(self):
-        logging.info("Generating next action")
+        logging.info("Starting to generate next action")
         prompt = self._generate_prompt()
         logging.info(f"Generated prompt: {prompt[:100]}...")  # Log first 100 chars of prompt
+        
+        logging.info("Sending request to LLM for next action")
         response = self._get_llm_response(prompt)
         logging.info(f"Received LLM response: {response[:100]}...")  # Log first 100 chars of response
+        
+        logging.info("Parsing LLM response")
         action, content = self._parse_llm_response(response)
         self._log_attempt(action, content)
-        logging.info(f"Decided on action: {action}, content: {content}")
+        
+        logging.info(f"Decided on action: {action}, content: {content[:50]}...")  # Log first 50 chars of content
         self.update_history(action, content, response)
+        
+        logging.info(f"Returning action: {action}")
         return action, content
 
     def _generate_prompt(self):
