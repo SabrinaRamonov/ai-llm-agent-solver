@@ -4,18 +4,19 @@ import re
 import logging
 import os
 
+
 class Action(Enum):
     ASK_QUESTION = auto()
     GUESS_PASSWORD = auto()
+
 
 class Agent:
     def __init__(self):
         self.current_level = 1
         self.max_levels = 8
         self.history = []
-        self.openai_api_key = os.getenv("OPENAI_API_KEY")  # Use environment variable for API key
-        self.client = OpenAI(api_key=self.openai_api_key)
-        logging.basicConfig(filename='agent_log.txt', level=logging.INFO)
+        self.client = OpenAI()
+        logging.basicConfig(filename="agent_log.txt", level=logging.INFO)
 
     async def next_action(self):
         if self.current_level <= self.max_levels:
@@ -56,13 +57,13 @@ class Agent:
         response = self.client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "system", "content": prompt}],
-            max_tokens=150
+            max_tokens=150,
         )
         return response.choices[0].message.content
 
     def _parse_llm_response(self, response):
-        action_match = re.search(r'Action: (\w+)', response)
-        content_match = re.search(r'Content: (.+)', response)
+        action_match = re.search(r"Action: (\w+)", response)
+        content_match = re.search(r"Content: (.+)", response)
 
         if action_match and content_match:
             action = Action[action_match.group(1)]
@@ -76,11 +77,9 @@ class Agent:
         logging.info(f"Attempt - Action: {action}, Content: {content}")
 
     def update_history(self, action, content, response):
-        self.history.append({
-            'action': action,
-            'content': content,
-            'response': response
-        })
+        self.history.append(
+            {"action": action, "content": content, "response": response}
+        )
 
     def parse_password(self, response):
         prompt = f"""
@@ -91,15 +90,15 @@ class Agent:
 
         Password:
         """
-        
+
         llm_response = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": prompt}],
-            max_tokens=50
+            max_tokens=50,
         )
-        
+
         extracted_password = llm_response.choices[0].message.content.strip()
-        
-        if extracted_password == 'No password found':
+
+        if extracted_password == "No password found":
             return None
         return extracted_password
