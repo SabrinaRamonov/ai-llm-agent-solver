@@ -2,6 +2,16 @@
 
 This project contains a solver for the Gandalf AI challenge.
 
+** Important: OpenAI API Key Setup
+
+Before running the test environment, make sure you have set up your OpenAI API key as an environment variable named =OPENAI_API_KEY=. You can do this by running:
+
+#+BEGIN_SRC shell
+export OPENAI_API_KEY=your_api_key_here
+#+END_SRC
+
+Replace =your_api_key_here= with your actual OpenAI API key.
+
 ** Running the Test Environment
 
 To run the test environment, follow these steps:
@@ -30,13 +40,3 @@ To run the test environment, follow these steps:
    #+END_SRC
 
 This will start the test environment, which will attempt to solve the Gandalf AI challenge using the implemented agent.
-
-** Note
-
-Make sure you have set up your OpenAI API key as an environment variable named =OPENAI_API_KEY= before running the test. You can do this by running:
-
-#+BEGIN_SRC shell
-export OPENAI_API_KEY=your_api_key_here
-#+END_SRC
-
-Replace =your_api_key_here= with your actual OpenAI API key.
