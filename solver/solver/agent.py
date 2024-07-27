@@ -1,7 +1,8 @@
 from enum import Enum, auto
-import openai
+from openai import OpenAI
 import re
 import logging
+import os
 
 class Action(Enum):
     ASK_QUESTION = auto()
@@ -12,8 +13,8 @@ class Agent:
         self.current_level = 1
         self.max_levels = 8
         self.history = []
-        self.openai_api_key = "your-api-key-here"  # Replace with your actual API key
-        openai.api_key = self.openai_api_key
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")  # Use environment variable for API key
+        self.client = OpenAI(api_key=self.openai_api_key)
         logging.basicConfig(filename='agent_log.txt', level=logging.INFO)
 
     async def next_action(self):
@@ -52,7 +53,7 @@ class Agent:
         return formatted_history
 
     def _get_llm_response(self, prompt):
-        response = openai.ChatCompletion.create(
+        response = self.client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "system", "content": prompt}],
             max_tokens=150
@@ -91,7 +92,7 @@ class Agent:
         Password:
         """
         
-        llm_response = openai.ChatCompletion.create(
+        llm_response = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": prompt}],
             max_tokens=50
