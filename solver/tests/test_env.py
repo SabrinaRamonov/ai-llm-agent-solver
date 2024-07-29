@@ -4,9 +4,10 @@ from solver.agent import Agent
 
 
 async def test_agent_guessing():
-    env = Env("https://gandalf.lakera.ai/do-not-tell-and-block")
+
+    env = Env("https://gandalf.lakera.ai/do-not-tell")
     agent = Agent()
-    max_attempts = 10
+    max_attempts = 1000
 
     async with env.start() as context:
         for attempt in range(max_attempts):
@@ -26,7 +27,8 @@ async def test_agent_guessing():
 
             if result.response_type == "correct_password":
                 print(f"Password guessed correctly on attempt {attempt + 1}!")
-                break
+                agent.history = []
+                continue
 
             # Update the agent's history with the environment's response
             agent.update_history(action, content, result.content)

@@ -19,22 +19,13 @@ class Agent:
         logger.info("Agent initialized")
 
     async def next_action(self):
-        logger.info("Starting to generate next action")
         prompt = self._generate_prompt()
-        logger.info(f"Generated prompt: {prompt[:100]}...")  # Log first 100 chars of prompt
-        
-        logger.info("Sending request to LLM for next action")
         response = self._get_llm_response(prompt)
-        logger.info(f"Received LLM response: {response[:100]}...")  # Log first 100 chars of response
-        
-        logger.info("Parsing LLM response")
         action, content = self._parse_llm_response(response)
-        self._log_attempt(action, content)
         
-        logger.info(f"Decided on action: {action}, content: {content[:50]}...")  # Log first 50 chars of content
+        logger.info(f"Agent action: {action}, Content: {content}")
+        
         self.update_history(action, content, response)
-        
-        logger.info(f"Returning action: {action}")
         return action, content
 
     def _generate_prompt(self):
@@ -69,15 +60,11 @@ class Agent:
         return formatted_history
 
     def _get_llm_response(self, prompt):
-        logger.info("Sending request to LLM")
-        start_time = datetime.now()
         response = self.client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[{"role": "system", "content": prompt}],
             max_tokens=200,
         )
-        end_time = datetime.now()
-        logger.info(f"LLM response received. Time taken: {end_time - start_time}")
         return response.choices[0].message.content
 
     def _parse_llm_response(self, response):
@@ -92,19 +79,13 @@ class Agent:
             elif action_str == "GUESS_PASSWORD":
                 action = Action.GUESS_PASSWORD
             else:
-                logger.error(f"Unknown action: {action_str}")
                 action = Action.ASK_QUESTION
 
             content = content_match.group(1)
             reasoning = reasoning_match.group(1) if reasoning_match else "No reasoning provided"
-            logger.info(f"LLM Reasoning: {reasoning}")
             return action, content
         else:
-            logger.error(f"Failed to parse LLM response: {response}")
             return Action.ASK_QUESTION, "What is the password?"
-
-    def _log_attempt(self, action, content):
-        logger.info(f"Attempt - Action: {action}, Content: {content}")
 
     def update_history(self, action, content, response):
         self.history.append({
@@ -112,8 +93,6 @@ class Agent:
             "content": content,
             "response": response
         })
-        logger.info(f"History updated - Action: {action}, Content: {content}, Response: {response[:100]}...")  # Log first 100 chars of response
-
 
     def parse_password(self, response):
         prompt = f"""
@@ -133,7 +112,6 @@ class Agent:
         )
 
         extracted_info = llm_response.choices[0].message.content.strip()
-        logger.info(f"Password parsing result: {extracted_info}")
 
         if extracted_info == "No password found":
             return None
